@@ -8,7 +8,10 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.json.JSONObject;
+
 import com.google.gson.Gson;
+import com.google.gson.JsonParser;
 import com.thoughtworks.xstream.XStream;
 
 public class Carrinho {
@@ -76,5 +79,15 @@ public class Carrinho {
 	public List<Produto> getProdutos() {
 		return produtos;
 	}
+
+    /** 
+     * TODO Descrição do Método
+     * @return
+     */
+    public String toJSON () {
+        
+        
+        return new JSONObject( this ).toString();
+    }
 
 }
