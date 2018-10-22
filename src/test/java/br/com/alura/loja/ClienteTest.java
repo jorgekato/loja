@@ -5,17 +5,20 @@ package br.com.alura.loja;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.glassfish.grizzly.http.server.HttpServer;
+import org.glassfish.jersey.client.ClientConfig;
+import org.glassfish.jersey.filter.LoggingFilter;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.google.gson.Gson;
-
 import br.com.alura.loja.modelo.Carrinho;
-import br.com.alura.loja.modelo.Projeto;
+import br.com.alura.loja.modelo.Produto;
 import junit.framework.Assert;
 
 /**
@@ -34,10 +37,17 @@ import junit.framework.Assert;
 public class ClienteTest {
 
     private HttpServer server;
+    WebTarget target;
+    private Client client;
 
     @Before
     public void iniciaServidor () {
         server = Servidor.inicializaServidor();
+
+        ClientConfig config = new ClientConfig();
+        config.register( new LoggingFilter() );
+        this.client = ClientBuilder.newClient( config );
+        this.target = client.target( "http://localhost:8080" );
     }
 
     @After
@@ -54,38 +64,63 @@ public class ClienteTest {
     // Assert.assertTrue( conteudo.contains( "<rua>Rua Vergueiro 3185" ) );
     // }
 
-//    @Test
-//    public void testaQueBuscarUmCarrinhoTrazOCarrinhoEsperado () {
-//
-//        Client client = ClientBuilder.newClient();
-//        WebTarget target = client.target( "http://localhost:8080" );
-//        String conteudo = target.path( "/carrinhos" ).request().get( String.class );
-//        System.out.println( conteudo );
-//        Gson gson = new Gson();
-//        Carrinho carrinho = gson.fromJson( conteudo , Carrinho.class );
-//        Assert.assertEquals( "Rua Vergueiro 3185, 8 andar" , carrinho.getRua() );
-//
-//    }
+    // @Test
+    // public void testaQueBuscarUmCarrinhoTrazOCarrinhoEsperado () {
+    //
+    // Client client = ClientBuilder.newClient();
+    // WebTarget target = client.target( "http://localhost:8080" );
+    // String conteudo = target.path( "/carrinhos" ).request().get( String.class
+    // );
+    // System.out.println( conteudo );
+    // Gson gson = new Gson();
+    // Carrinho carrinho = gson.fromJson( conteudo , Carrinho.class );
+    // Assert.assertEquals( "Rua Vergueiro 3185, 8 andar" , carrinho.getRua() );
+    //
+    // }
 
-//    @Test
-//    public void testaQueAConexaoComOServidorFuncionaNoPathDeProjetos () {
-//        Client client = ClientBuilder.newClient();
-//        WebTarget target = client.target( "http://localhost:8080" );
-//        String conteudo = target.path( "/projetos" ).request().get( String.class );
-//        Assert.assertTrue( conteudo.contains( "Minha loja" ) );
-//
-//    }
+    // @Test
+    // public void testaQueAConexaoComOServidorFuncionaNoPathDeProjetos () {
+    // Client client = ClientBuilder.newClient();
+    // WebTarget target = client.target( "http://localhost:8080" );
+    // String conteudo = target.path( "/projetos" ).request().get( String.class
+    // );
+    // Assert.assertTrue( conteudo.contains( "Minha loja" ) );
+    //
+    // }
+
+    // @Test
+    // public void testaQueBuscarUmCarrinhoTrazOProjetoEsperado () {
+    //
+    // Client client = ClientBuilder.newClient();
+    // WebTarget target = client.target( "http://localhost:8080" );
+    // String conteudo = target.path( "/carrinhos/1" ).request().get(
+    // String.class );
+    // System.out.println( conteudo );
+    // Gson gson = new Gson();
+    // Carrinho carrinho = gson.fromJson( conteudo , Carrinho.class );
+    // Assert.assertEquals( "Rua Vergueiro 3185, 8 andar" , carrinho.getRua() );
+    //
+    // }
 
     @Test
-    public void testaQueBuscarUmCarrinhoTrazOProjetoEsperado () {
+    public void testaEnvioDeCarrinhoViaPost () {
 
-        Client client = ClientBuilder.newClient();
-        WebTarget target = client.target( "http://localhost:8080" );
-        String conteudo = target.path( "/projetos" ).request().get( String.class );
-        System.out.println( conteudo );
-        Gson gson = new Gson();
-        Projeto projeto = gson.fromJson( conteudo , Projeto.class );
-        Assert.assertEquals( "Minha loja" , projeto.getNome() );
+        // transformar o carrinho em XML ou Json
+        Carrinho carrinho = new Carrinho();
+        carrinho.adiciona( new Produto( 314L , "Tablet" , 991 , 1 ) );
+        carrinho.setRua( "Rua Vergueiro" );
+        carrinho.setCidade( "São Paulo" );
+        String json = carrinho.toJSON();
+
+        // criar a representação do media type
+        Entity < String > entity = Entity.entity( json , MediaType.APPLICATION_JSON );
+        Response response = target.path( "/carrinhos" ).request().post( entity );
+        Assert.assertEquals( 201 , response.getStatus() );// verifica o response
+                                                          // code para adicionar
+                                                          // um carrinho
+        String location = response.getHeaderString( "Location" );
+        String conteudo = client.target( location ).request().get( String.class );
+        Assert.assertTrue( conteudo.contains( "Tablet" ) );
 
     }
 

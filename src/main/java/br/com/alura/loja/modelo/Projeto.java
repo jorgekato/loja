@@ -3,7 +3,13 @@
  */
 package br.com.alura.loja.modelo;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+
 import org.json.JSONObject;
+
+import com.thoughtworks.xstream.XStream;
 
 /**
  * DOCUMENTAÇÃO DA CLASSE <br>
@@ -17,13 +23,16 @@ import org.json.JSONObject;
  * <br>
  * LISTA DE CLASSES INTERNAS: <br>
  */
-
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 public class Projeto {
 
     private long id;
     private String nome;
     private int anoDeInicio;
 
+    
+    public Projeto() {}
     /**
      * TODO Construtor padrão/alternativo da classe
      * 
@@ -94,15 +103,24 @@ public class Projeto {
     public void setAnoDeInicio ( int anoDeInicio ) {
         this.anoDeInicio = anoDeInicio;
     }
-    
-    /** 
+
+    /**
      * TODO Descrição do Método
+     * 
      * @return
      */
     public String toJSON () {
-        
-        
+
         return new JSONObject( this ).toString();
+    }
+
+    /**
+     * TODO Descrição do Método
+     * 
+     * @return
+     */
+    public String toXml () {
+        return new XStream().toXML( this );
     }
 
 }

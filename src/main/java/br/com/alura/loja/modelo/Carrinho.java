@@ -87,7 +87,8 @@ public class Carrinho {
     public String toJSON () {
         
         
-        return new JSONObject( this ).toString();
+//        return new JSONObject( this ).toString();
+        return new Gson().toJson( this );
     }
 
 }
